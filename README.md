@@ -14,7 +14,7 @@ Este proyecto está siendo desarrollado por los integrantes del **Grupo 8** de l
 
 | Nombre del Integrante             | Carnet  |
 | --------------------------------- | ------- |
-|     				    |	      |
+| José Wilfredo Ponce Barahona      | PB24007 |
 | Ana Estefany Quintanilla de Ponce | QP24002 |
 | Daniel Alexis Ramirez Martinez    | RM24082 |
 | Eileen Marisol Reyes Rodriguez    | RR24044 |
