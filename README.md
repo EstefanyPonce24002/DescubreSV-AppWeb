@@ -18,7 +18,6 @@ Este proyecto está siendo desarrollado por los integrantes del **Grupo 8** de l
 | Daniel Alexis Ramirez Martinez    | RM24082 |
 | Javier Alexander Rodriguez Flores | RF24006 |
 | Eileen Marisol Reyes Rodriguez    | RR24044 |
-|                                   |         |
 
 ---
 
