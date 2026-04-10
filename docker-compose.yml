@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: descubresv_db
+    environment:
+      POSTGRES_DB: descubresv_db
+      POSTGRES_USER: descubresv_user
+      POSTGRES_PASSWORD: descubresv_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/descubresv_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+    networks:
+      - descubresv_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U descubresv_user -d descubresv_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend/descubresv
+      dockerfile: Dockerfile
+      network: host
+    container_name: descubresv_backend
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/descubresv_db
+      DB_USERNAME: descubresv_user
+      DB_PASSWORD: descubresv_pass
+      JWT_SECRET: ZGVzY3VicmVzdl9zZWNyZXRfa2V5X3N1cGVyX3NlZ3VyYV8yMDI2X3Byb3llY3Rv
+      CORS_ORIGINS: http://localhost:5173,http://localhost:3000
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - descubresv_net
+
+volumes:
+  postgres_data:
+
+networks:
+  descubresv_net:
+    driver: bridge
