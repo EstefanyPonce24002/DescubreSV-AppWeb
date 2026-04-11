@@ -1,13 +1,9 @@
--- DescubreSV - Esquema de Base de Datos PostgreSQL
-
--- Tipo ENUM para roles de usuario
 DO $$ BEGIN
     CREATE TYPE rol_usuario AS ENUM ('ADMIN', 'TURISTA');
 EXCEPTION
     WHEN duplicate_object THEN NULL;
 END $$;;
 
--- Tabla usuarios
 CREATE TABLE IF NOT EXISTS usuarios (
     id_usuario          SERIAL PRIMARY KEY,
     nombre              VARCHAR(100) NOT NULL,
@@ -23,11 +19,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );;
 
--- Indices de usuario
 CREATE INDEX IF NOT EXISTS idx_usuarios_correo ON usuarios(correo);;
 CREATE INDEX IF NOT EXISTS idx_usuarios_rol ON usuarios(rol);;
 
--- Tabla categorias_destino
 CREATE TABLE IF NOT EXISTS categorias_destino (
     id_categoria        SERIAL PRIMARY KEY,
     nombre_categoria    VARCHAR(100) NOT NULL UNIQUE,
@@ -37,7 +31,6 @@ CREATE TABLE IF NOT EXISTS categorias_destino (
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );;
 
--- Tabla destinos
 CREATE TABLE IF NOT EXISTS destinos (
     id_destino          SERIAL PRIMARY KEY,
     nombre              VARCHAR(200) NOT NULL,
@@ -59,13 +52,11 @@ CREATE TABLE IF NOT EXISTS destinos (
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );;
 
--- Indices de destinos
 CREATE INDEX IF NOT EXISTS idx_destinos_categoria ON destinos(id_categoria);;
 CREATE INDEX IF NOT EXISTS idx_destinos_departamento ON destinos(departamento);;
 CREATE INDEX IF NOT EXISTS idx_destinos_tipo ON destinos(tipo);;
 CREATE INDEX IF NOT EXISTS idx_destinos_activo ON destinos(activo);;
 
--- Tabla favoritos
 CREATE TABLE IF NOT EXISTS favoritos (
     id_favorito         SERIAL PRIMARY KEY,
     id_usuario          INTEGER NOT NULL REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
@@ -77,7 +68,6 @@ CREATE TABLE IF NOT EXISTS favoritos (
 CREATE INDEX IF NOT EXISTS idx_favoritos_usuario ON favoritos(id_usuario);;
 CREATE INDEX IF NOT EXISTS idx_favoritos_destino ON favoritos(id_destino);;
 
--- Tabla resenas
 CREATE TABLE IF NOT EXISTS resenas (
     id_resena           SERIAL PRIMARY KEY,
     id_usuario          INTEGER NOT NULL REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
@@ -92,7 +82,6 @@ CREATE INDEX IF NOT EXISTS idx_resenas_usuario ON resenas(id_usuario);;
 CREATE INDEX IF NOT EXISTS idx_resenas_destino ON resenas(id_destino);;
 CREATE INDEX IF NOT EXISTS idx_resenas_calificacion ON resenas(calificacion);;
 
--- Tabla itinerarios
 CREATE TABLE IF NOT EXISTS itinerarios (
     id_itinerario       SERIAL PRIMARY KEY,
     id_usuario          INTEGER NOT NULL REFERENCES usuarios(id_usuario) ON DELETE CASCADE,
@@ -111,7 +100,6 @@ CREATE TABLE IF NOT EXISTS itinerarios (
 
 CREATE INDEX IF NOT EXISTS idx_itinerarios_usuario ON itinerarios(id_usuario);;
 
--- Tabla itinerario_destinos
 CREATE TABLE IF NOT EXISTS itinerario_destinos (
     id_itinerario       INTEGER NOT NULL REFERENCES itinerarios(id_itinerario) ON DELETE CASCADE,
     id_destino          INTEGER NOT NULL REFERENCES destinos(id_destino) ON DELETE CASCADE,
@@ -124,7 +112,6 @@ CREATE TABLE IF NOT EXISTS itinerario_destinos (
 
 CREATE INDEX IF NOT EXISTS idx_itinerario_destinos_destino ON itinerario_destinos(id_destino);;
 
--- Tabla presupuesto
 CREATE TABLE IF NOT EXISTS presupuesto (
     id_presupuesto      SERIAL PRIMARY KEY,
     id_itinerario       INTEGER NOT NULL REFERENCES itinerarios(id_itinerario) ON DELETE CASCADE,
@@ -140,7 +127,6 @@ CREATE TABLE IF NOT EXISTS presupuesto (
 
 CREATE INDEX IF NOT EXISTS idx_presupuesto_itinerario ON presupuesto(id_itinerario);;
 
--- Tabla transportes
 CREATE TABLE IF NOT EXISTS transportes (
     id_transporte       SERIAL PRIMARY KEY,
     tipo                VARCHAR(100) NOT NULL,
@@ -155,7 +141,6 @@ CREATE TABLE IF NOT EXISTS transportes (
 
 CREATE INDEX IF NOT EXISTS idx_transportes_destino ON transportes(id_destino);;
 
--- Tabla alimentacion
 CREATE TABLE IF NOT EXISTS alimentacion (
     id_alimentacion     SERIAL PRIMARY KEY,
     nombre              VARCHAR(200) NOT NULL,
@@ -172,7 +157,6 @@ CREATE TABLE IF NOT EXISTS alimentacion (
 
 CREATE INDEX IF NOT EXISTS idx_alimentacion_destino ON alimentacion(id_destino);;
 
--- Funcion reutilizable
 CREATE OR REPLACE FUNCTION actualizar_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -181,7 +165,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;;
 
--- Triggers (Con DROP previo para evitar errores)
 DROP TRIGGER IF EXISTS trg_usuarios_updated_at ON usuarios;;
 CREATE TRIGGER trg_usuarios_updated_at BEFORE UPDATE ON usuarios FOR EACH ROW EXECUTE FUNCTION actualizar_updated_at();;
 
