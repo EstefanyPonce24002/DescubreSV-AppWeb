@@ -1,0 +1,9 @@
+/home/daniel/Desktop/Java/DescubreSV-AppWeb/backend/descubresv/src/main/java/com/example/descubresv/DescubresvApplication.java
+/home/daniel/Desktop/Java/DescubreSV-AppWeb/backend/descubresv/src/main/java/com/example/descubresv/config/SecurityConfig.java
+/home/daniel/Desktop/Java/DescubreSV-AppWeb/backend/descubresv/src/main/java/com/example/descubresv/config/SwaggerConfig.java
+/home/daniel/Desktop/Java/DescubreSV-AppWeb/backend/descubresv/src/main/java/com/example/descubresv/controller/HolaMundoController.java
+/home/daniel/Desktop/Java/DescubreSV-AppWeb/backend/descubresv/src/main/java/com/example/descubresv/model/enums/RolUsuario.java
+/home/daniel/Desktop/Java/DescubreSV-AppWeb/backend/descubresv/src/main/java/com/example/descubresv/security/CsrfCookieFilter.java
+/home/daniel/Desktop/Java/DescubreSV-AppWeb/backend/descubresv/src/main/java/com/example/descubresv/security/JwtAuthenticationFilter.java
+/home/daniel/Desktop/Java/DescubreSV-AppWeb/backend/descubresv/src/main/java/com/example/descubresv/security/JwtService.java
+/home/daniel/Desktop/Java/DescubreSV-AppWeb/backend/descubresv/src/main/java/com/example/descubresv/security/SpaCsrfTokenRequestHandler.java
