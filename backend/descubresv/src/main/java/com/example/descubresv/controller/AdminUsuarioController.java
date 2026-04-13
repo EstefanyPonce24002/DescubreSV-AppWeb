@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/admin/usuarios")
 
 // Etiqueta para Swagger (documentación de la API)
-@Tag(name = "Admin - Usuarios", description = "Gestión de usuarios por el administrador")
+@Tag(name = "ADMINISTRAR USUARIOS", description = "Gestión de usuarios por el administrador")
 public class AdminUsuarioController {
 
     // ===== INYECCIÓN DE DEPENDENCIAS =====
