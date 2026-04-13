@@ -22,3 +22,6 @@ target/
 # OS basura
 .DS_Store
 Thumbs.db
+
+# Scripts de prueba locales
+scripts/
