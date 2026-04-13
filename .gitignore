@@ -1,0 +1,24 @@
+# IDEs
+.vscode/
+.idea/
+
+# Java compilado
+*.class
+*.log
+*.ctxt
+
+# Empaquetado
+*.jar
+*.war
+*.ear
+
+# Maven
+target/
+**/target/
+
+# Maven wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# OS basura
+.DS_Store
+Thumbs.db
