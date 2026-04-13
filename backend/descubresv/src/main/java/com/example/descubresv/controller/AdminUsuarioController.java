@@ -113,16 +113,15 @@ public class AdminUsuarioController {
     }
 
 
-    // ===== ELIMINAR (DESACTIVACIÓN LÓGICA) =====
+    // ===== ELIMINAR =====
     @DeleteMapping("/{id}")
-    @Operation(summary = "Desactivar usuario", description = "Desactiva lógicamente un usuario")
+    @Operation(summary = "Eliminar usuario", description = "Elimina un usuario")
     public ResponseEntity<ApiResponse<String>> eliminar(@PathVariable Long id) {
 
-        // No elimina físicamente en BD, solo cambia estado (ej: activo = false)
         adminUsuarioService.eliminar(id);
 
         // Retorna confirmación
         return ResponseEntity.ok(
-                ApiResponse.success("Usuario desactivado exitosamente", null));
+                ApiResponse.success("Usuario eliminado exitosamente", null));
     }
 }
