@@ -93,7 +93,6 @@ public class AdminUsuarioService {
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + id));
 
-        usuario.setActivo(false); // Soft delete
-        usuarioRepository.save(usuario);
+        usuarioRepository.delete(usuario);
     }
 }
