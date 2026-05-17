@@ -18,14 +18,17 @@ public class JwtService {
     private final SecretKey claveSecreta;
     private final long tiempoExpiracion;
     private final String nombreCookie;
+    private final boolean cookieSecure;
 
     public JwtService(
             @Value("${jwt.secret}") String secreto,
             @Value("${jwt.expiration}") long expiracion,
-            @Value("${jwt.cookie-name}") String cookie) {
+            @Value("${jwt.cookie-name}") String cookie,
+            @Value("${jwt.cookie-secure:false}") boolean secure) {
         this.claveSecreta = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secreto));
         this.tiempoExpiracion = expiracion;
         this.nombreCookie = cookie;
+        this.cookieSecure = secure;
     }
 
     public String generarToken(Long userId, String email, RolUsuario rol) {
@@ -66,14 +69,24 @@ public class JwtService {
     }
 
     public Cookie crearCookieJwt(String token) {
-        Cookie cookie = new Cookie(nombreCookie, token);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge((int) (tiempoExpiracion / 1000));
-        return cookie;
+        return buildCookie(token, (int) (tiempoExpiracion / 1000));
+    }
+
+    public Cookie crearCookieLogout() {
+        return buildCookie("", 0);
     }
 
     public String getNombreCookie() {
         return nombreCookie;
+    }
+
+    private Cookie buildCookie(String value, int maxAge) {
+        Cookie cookie = new Cookie(nombreCookie, value);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(cookieSecure);
+        cookie.setPath("/");
+        cookie.setMaxAge(maxAge);
+        cookie.setAttribute("SameSite", "Strict");
+        return cookie;
     }
 }
