@@ -7,33 +7,25 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UsuarioResponse {
+public class AuthResponse {
 
     private Long idUsuario;
     private String nombre;
     private String correo;
-    private String nacionalidad;
     private String avatarUrl;
     private RolUsuario rol;
-    private Boolean activo;
-    private LocalDateTime createdAt;
 
-    public static UsuarioResponse fromEntity(Usuario usuario) {
-        return UsuarioResponse.builder()
+    public static AuthResponse fromEntity(Usuario usuario) {
+        return AuthResponse.builder()
                 .idUsuario(usuario.getIdUsuario())
                 .nombre(usuario.getNombre())
                 .correo(usuario.getCorreo())
-                .nacionalidad(usuario.getNacionalidad())
                 .avatarUrl(usuario.getAvatarUrl())
                 .rol(usuario.getRol())
-                .activo(usuario.getActivo())
-                .createdAt(usuario.getCreatedAt())
                 .build();
     }
 }

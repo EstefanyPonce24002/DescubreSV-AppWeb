@@ -1,8 +1,13 @@
 package com.example.descubresv.config;
 
-import com.example.descubresv.security.*;
+import com.example.descubresv.security.CsrfCookieFilter;
+import com.example.descubresv.security.JwtAccessDeniedHandler;
+import com.example.descubresv.security.JwtAuthenticationEntryPoint;
+import com.example.descubresv.security.JwtAuthenticationFilter;
+import com.example.descubresv.security.SpaCsrfTokenRequestHandler;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -15,8 +20,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.web.cors.*;
-import java.util.*;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -24,9 +33,19 @@ import java.util.*;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
-    @Value("${app.cors.allowed-origins}") private String[] origenes;
+    private final JwtAuthenticationEntryPoint jwtEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) { this.jwtAuthFilter = jwtAuthFilter; }
+    @Value("${app.cors.allowed-origins}")
+    private String[] origenes;
+
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
+                          JwtAuthenticationEntryPoint jwtEntryPoint,
+                          JwtAccessDeniedHandler jwtAccessDeniedHandler) {
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.jwtEntryPoint = jwtEntryPoint;
+        this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -35,11 +54,15 @@ public class SecurityConfig {
                 .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
                 .ignoringRequestMatchers("/api/**", "/swagger-ui/**", "/v3/api-docs/**"))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint(jwtEntryPoint)
+                .accessDeniedHandler(jwtAccessDeniedHandler))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/auth/**", "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api/public/**").permitAll()
+                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/destinos/**", "/api/categorias/**").permitAll()
-                .requestMatchers("/api/admin/usuarios/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/turista/**").hasRole("TURISTA")
                 .anyRequest().authenticated())
@@ -60,6 +83,13 @@ public class SecurityConfig {
         return source;
     }
 
-    @Bean public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
-    @Bean public AuthenticationManager authManager(AuthenticationConfiguration c) throws Exception { return c.getAuthenticationManager(); }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
 }
