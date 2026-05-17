@@ -11,6 +11,15 @@ const PAISES = [
   'Argentina', 'Chile', 'Perú', 'Brasil', 'Canadá', 'Otro'
 ];
 
+interface UserData {
+  nombre?: string;
+  correo?: string;
+  nacionalidad?: string;
+  presupuesto_estimado?: number;
+  rol?: string;
+  activo?: boolean;
+}
+
 interface FormData {
   nombre: string;
   correo: string;
@@ -31,8 +40,8 @@ export const CreateUser = ({
   onSave,
   onCancel
 }: {
-  userToEdit?: any;
-  onSave: (data: any) => void;
+  userToEdit?: UserData;
+  onSave: (data: FormData) => void;
   onCancel: () => void;
 }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -155,7 +164,7 @@ export const CreateUser = ({
             <span>Cancelar</span>
           </button>
           <button
-            className={btn-primary btn-save ${isSubmitting ? 'loading' : ''}}
+            className={`btn-primary btn-save ${isSubmitting ? 'loading' : ''}`}
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
@@ -193,7 +202,7 @@ export const CreateUser = ({
               {formData.nombre || 'Nuevo Usuario'}
             </div>
             <div className="preview-role-badge">
-              <span className={badge ${formData.rol === 'ADMIN' ? 'badge-purple' : 'badge-info'}}>
+              <span className={`badge ${formData.rol === 'ADMIN' ? 'badge-purple' : 'badge-info'}`}>
                 {formData.rol}
               </span>
             </div>
@@ -240,7 +249,7 @@ export const CreateUser = ({
                 <User size={16} className="form-input-icon" />
                 <input
                   type="text"
-                  className={form-input form-input-with-icon ${errors.nombre ? 'form-input-error' : ''}}
+                  className={`form-input form-input-with-icon ${errors.nombre ? 'form-input-error' : ''}`}
                   placeholder="Ej: Daniel Ramírez"
                   maxLength={100}
                   value={formData.nombre}
@@ -263,7 +272,7 @@ export const CreateUser = ({
                 <Mail size={16} className="form-input-icon" />
                 <input
                   type="email"
-                  className={form-input form-input-with-icon ${errors.correo ? 'form-input-error' : ''}}
+                  className={`form-input form-input-with-icon ${errors.correo ? 'form-input-error' : ''}`}
                   placeholder="usuario@ejemplo.com"
                   maxLength={150}
                   value={formData.correo}
@@ -331,7 +340,7 @@ export const CreateUser = ({
             <div className="role-selector">
               <button
                 type="button"
-                className={role-option ${formData.rol === 'TURISTA' ? 'active' : ''}}
+                className={`role-option ${formData.rol === 'TURISTA' ? 'active' : ''}`}
                 onClick={() => updateField('rol', 'TURISTA')}
               >
                 <Globe size={20} />
@@ -342,7 +351,7 @@ export const CreateUser = ({
               </button>
               <button
                 type="button"
-                className={role-option ${formData.rol === 'ADMIN' ? 'active' : ''}}
+                className={`role-option ${formData.rol === 'ADMIN' ? 'active' : ''}`}
                 onClick={() => updateField('rol', 'ADMIN')}
               >
                 <Shield size={20} />
@@ -358,13 +367,13 @@ export const CreateUser = ({
             <div className="form-field">
               <label className="form-label">
                 Contraseña {!isEditing && <span className="form-required">*</span>}
-                {isEditing && <span className="form-label-hint" style={{marginLeft: 8, fontSize: '0.8rem', color: 'var(--text-secondary)'}}>(Dejar en blanco para mantener actual)</span>}
+                {isEditing && <span className="form-label-hint" style={{marginLeft: 8, fontSize: '0.8rem', color: 'var(--text-secondary)'}}>( Dejar en blanco para mantener actual)</span>}
               </label>
               <div className="form-input-wrapper">
                 <Lock size={16} className="form-input-icon" />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  className={form-input form-input-with-icon form-input-password ${errors.password ? 'form-input-error' : ''}}
+                  className={`form-input form-input-with-icon form-input-password ${errors.password ? 'form-input-error' : ''}`}
                   placeholder="Mínimo 8 caracteres"
                   value={formData.password}
                   onChange={(e) => updateField('password', e.target.value)}
@@ -413,7 +422,7 @@ export const CreateUser = ({
                 <Lock size={16} className="form-input-icon" />
                 <input
                   type={showConfirmPassword ? 'text' : 'password'}
-                  className={form-input form-input-with-icon form-input-password ${errors.confirmPassword ? 'form-input-error' : ''}}
+                  className={`form-input form-input-with-icon form-input-password ${errors.confirmPassword ? 'form-input-error' : ''}`}
                   placeholder="Repite la contraseña"
                   value={formData.confirmPassword}
                   onChange={(e) => updateField('confirmPassword', e.target.value)}
@@ -441,7 +450,10 @@ export const CreateUser = ({
                 <span className="form-toggle-label">Cuenta Activa</span>
                 <span className="form-toggle-desc">El usuario podrá iniciar sesión inmediatamente</span>
               </div>
-              <div className={toggle-switch ${formData.activo ? 'active' : ''}} onClick={() => updateField('activo', !formData.activo)}>
+              <div
+                className={`toggle-switch ${formData.activo ? 'active' : ''}`}
+                onClick={() => updateField('activo', !formData.activo)}
+              >
                 <div className="toggle-switch-thumb" />
               </div>
             </label>
@@ -461,7 +473,7 @@ export const CreateUser = ({
               </button>
               <button
                 type="submit"
-                className={btn-primary btn-save ${isSubmitting ? 'loading' : ''}}
+                className={`btn-primary btn-save ${isSubmitting ? 'loading' : ''}`}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
