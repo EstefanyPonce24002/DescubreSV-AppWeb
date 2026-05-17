@@ -1,6 +1,9 @@
-import { Bell, ChevronDown } from 'lucide-react';
+import { Bell, ChevronDown, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../../hooks/useTheme';
 
 export const AdminTopbar = () => {
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <header className="admin-topbar">
       <div className="topbar-title">
@@ -8,6 +11,16 @@ export const AdminTopbar = () => {
       </div>
 
       <div className="topbar-actions">
+        {/* Toggle tema claro/oscuro */}
+        <button
+          className="theme-toggle-btn"
+          onClick={toggleTheme}
+          aria-label="Cambiar tema"
+          title={theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'}
+        >
+          {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+        </button>
+
         <button className="topbar-icon-btn">
           <Bell size={18} />
           <span className="notification-dot" />
@@ -17,7 +30,8 @@ export const AdminTopbar = () => {
 
         <div className="user-profile-menu">
           <div className="avatar">AD</div>
-          <div className="user-profile-info">
+          {/* Nombre y rol ocultos en mobile */}
+          <div className="user-profile-info user-profile-info--desktop">
             <span className="user-profile-name">Admin Principal</span>
             <span className="user-profile-role">Administrador</span>
           </div>

@@ -127,6 +127,7 @@ input {
     var(--text-secondary)
   );
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -1495,6 +1496,7 @@ input {
 .hero-title-gradient {
   background: linear-gradient(135deg, var(--primary-color), #a78bfa, #06b6d4);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -3154,6 +3156,7 @@ input {
 [data-theme="light"] .sidebar-brand-text {
   background: linear-gradient(135deg, #1a1a2e, #4a4a6a);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -3181,4 +3184,31 @@ input {
   background-color: var(--card-hover);
   color: var(--text-primary);
   border-color: var(--border-light);
+}
+
+/* Desktop: sidebar fixed, contenido con margen */
+.layout-admin {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--app-bg);
+}
+
+.admin-content {
+  margin-left: 250px;
+  width: calc(100% - 250px);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mobile: contenido ocupa todo el ancho */
+@media (max-width: 768px) {
+  .admin-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .admin-sidebar {
+    width: 260px;
+  }
 }
