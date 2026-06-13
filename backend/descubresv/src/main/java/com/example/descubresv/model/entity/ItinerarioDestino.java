@@ -20,7 +20,7 @@ public class ItinerarioDestino {
     // Parte 1 de la clave primaria compuesta: referencia al itinerario propietario.
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_itinerario")
+    @JoinColumn(name = "id_itinerario", nullable = false)
     private Itinerario itinerario;
 
     // Parte 2 de la clave primaria compuesta: destino agregado al itinerario.
