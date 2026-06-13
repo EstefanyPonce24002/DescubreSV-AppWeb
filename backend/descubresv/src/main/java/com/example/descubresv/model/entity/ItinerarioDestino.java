@@ -26,7 +26,7 @@ public class ItinerarioDestino {
     // Parte 2 de la clave primaria compuesta: destino agregado al itinerario.
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_destino")
+    @JoinColumn(name = "id_destino", nullable = false)
     private Destino destino;
 
     // Dia del viaje en el que se planifica visitar este destino.
