@@ -40,7 +40,7 @@ public class AuthController {
         response.addCookie(jwtService.crearCookieJwt(token));
 
         return ResponseEntity.ok(
-                ApiResponse.success("Login exitoso", AuthResponse.fromEntity(usuario)));
+                ApiResponse.success("Login exitoso", AuthResponse.fromEntity(usuario, token)));
     }
 
     @PostMapping("/register")
@@ -54,7 +54,7 @@ public class AuthController {
         response.addCookie(jwtService.crearCookieJwt(token));
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Registro exitoso", AuthResponse.fromEntity(usuario)));
+                .body(ApiResponse.success("Registro exitoso", AuthResponse.fromEntity(usuario, token)));
     }
 
     @PostMapping("/logout")
