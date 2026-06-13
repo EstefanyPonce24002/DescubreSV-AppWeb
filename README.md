@@ -13,8 +13,8 @@ El Salvador carece de una plataforma centralizada que integre catálogo de desti
 
 ### Funcionalidades principales
 
-| Módulo                        | Descripción                                                              |
-| ----------------------------- | ------------------------------------------------------------------------ |
+| Módulo                        | Descripción                                                               |
+| ----------------------------- | ------------------------------------------------------------------------- |
 | 🔐 Autenticación              | Registro e inicio de sesión con JWT + control de roles (Admin / Turista) |
 | 🗺️ Catálogo de Destinos       | Listado, filtrado y detalle de destinos turísticos del país              |
 | 📅 Itinerarios                | Creación, edición y seguimiento de planes de viaje personalizados        |
@@ -235,20 +235,20 @@ JWT_SECRET: tu_clave_secreta_aqui
 
 ```
 Cliente (React)                    Backend (Spring Boot)
-      │                                      │
-      │  POST /api/auth/login                │
+      │                                       │
+      │  POST /api/auth/login                 │
       │  { email, password }  ──────────────▶│
-      │                                      │ Valida credenciales
-      │                                      │ Genera JWT (HS256)
+      │                                       │ Valida credenciales
+      │                                       │ Genera JWT (HS256)
       │◀─────────────────────────────────────│
-      │  { token: "eyJhbG..." }              │
-      │                                      │
-      │  GET /api/destinos                   │
+      │  { token: "eyJhbG..." }               │
+      │                                       │
+      │  GET /api/destinos                    │
       │  Authorization: Bearer eyJhbG... ───▶│
-      │                                      │ Valida firma del token
-      │                                      │ Extrae rol del usuario
+      │                                       │ Valida firma del token
+      │                                       │ Extrae rol del usuario
       │◀─────────────────────────────────────│
-      │  200 OK — [{ destinos... }]          │
+      │  200 OK — [{ destinos... }]           │
 ```
 
 - Token almacenado en el store de Zustand (memoria del cliente)
@@ -283,11 +283,11 @@ Cliente (React)                    Backend (Spring Boot)
 
 | Nombre                              | Carnet    |
 | ----------------------------------- | --------- |
-| José Wilfredo Ponce Barahona        | [PB24007] |
-| [Ana Estefany Quintanilla de Ponce] | [QP24002] |
-| [Daniel Alexis Ramirez Martinez]    | [RM24082] |
-| [Javier Alexander Rodriguez Flores] | [RF24006] |
-| [Eileen Marisol Reyes Rodriguez]    | [RR24044] |
+| José Wilfredo Ponce Barahona        |  PB24007  |
+| Ana Estefany Quintanilla de Ponce   |  QP24002  |
+| Daniel Alexis Ramirez Martinez      |  RM24082  |
+| Javier Alexander Rodriguez Flores   |  RF24006  |
+| Eileen Marisol Reyes Rodriguez      |  RR24044  |
 
 ---
 
