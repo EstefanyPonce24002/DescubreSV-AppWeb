@@ -10,6 +10,8 @@ import com.example.descubresv.model.enums.RolUsuario;
 import com.example.descubresv.repository.UsuarioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,15 @@ public class AdminUsuarioService {
     public AdminUsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    private void verificarPermisoRol(RolUsuario rolObjetivo) {
+        if (rolObjetivo == RolUsuario.ADMIN) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth == null || auth.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+                throw new BadRequestException("Solo los administradores pueden asignar el rol ADMIN.");
+            }
+        }
     }
 
     @Transactional(readOnly = true)
@@ -40,7 +51,6 @@ public class AdminUsuarioService {
 
     @Transactional
     public UsuarioResponse crear(AdminUsuarioRequest request) {
-
         if (usuarioRepository.existsByCorreo(request.getCorreo())) {
             throw new EmailAlreadyExistsException("Ya existe un usuario con el correo: " + request.getCorreo());
         }
@@ -48,6 +58,8 @@ public class AdminUsuarioService {
         if (request.getPassword() == null || request.getPassword().isBlank()) {
             throw new BadRequestException("La contraseña es obligatoria");
         }
+
+        verificarPermisoRol(request.getRol());
 
         Usuario usuario = Usuario.builder()
                 .nombre(request.getNombre())
@@ -66,7 +78,6 @@ public class AdminUsuarioService {
 
     @Transactional
     public UsuarioResponse actualizar(Long id, AdminUsuarioRequest request) {
-
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + id));
 
@@ -74,6 +85,8 @@ public class AdminUsuarioService {
                 usuarioRepository.existsByCorreo(request.getCorreo())) {
             throw new EmailAlreadyExistsException("Ya existe otro usuario con el correo: " + request.getCorreo());
         }
+
+        verificarPermisoRol(request.getRol());
 
         usuario.setNombre(request.getNombre());
         usuario.setCorreo(request.getCorreo());

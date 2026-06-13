@@ -4,6 +4,7 @@ import {
   DollarSign, Save, X, UserPlus, Camera, MapPin,
   CheckCircle, AlertCircle
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 const PAISES = [
   'El Salvador', 'Guatemala', 'Honduras', 'Nicaragua', 'Costa Rica',
@@ -15,7 +16,7 @@ interface UserData {
   nombre?: string;
   correo?: string;
   nacionalidad?: string;
-  presupuesto_estimado?: number;
+  presupuestoEstimado?: number;
   rol?: string;
   activo?: boolean;
 }
@@ -41,9 +42,12 @@ export const CreateUser = ({
   onCancel
 }: {
   userToEdit?: UserData;
-  onSave: (data: FormData) => void;
+  onSave: (data: FormData) => Promise<void>;
   onCancel: () => void;
 }) => {
+  const { user: currentUser } = useAuth();
+  const isCurrentUserAdmin = currentUser?.rol === 'ADMIN';
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,7 +58,7 @@ export const CreateUser = ({
     nombre: userToEdit?.nombre || '',
     correo: userToEdit?.correo || '',
     nacionalidad: userToEdit?.nacionalidad || '',
-    presupuesto_estimado: userToEdit?.presupuesto_estimado?.toString() || '',
+    presupuesto_estimado: userToEdit?.presupuestoEstimado?.toString() || '',
     rol: userToEdit?.rol || 'TURISTA',
     password: '',
     confirmPassword: '',
@@ -101,13 +105,24 @@ export const CreateUser = ({
     if (!validate()) return;
 
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1800));
-    setIsSubmitting(false);
-    setShowSuccess(true);
+    setErrors(prev => {
+      const next = { ...prev };
+      delete next.submit;
+      return next;
+    });
 
-    setTimeout(() => {
-      onSave(formData);
-    }, 2000);
+    try {
+      await onSave(formData);
+      setIsSubmitting(false);
+      setShowSuccess(true);
+      setTimeout(() => {
+        onCancel();
+      }, 2000);
+    } catch (err: any) {
+      setIsSubmitting(false);
+      const msg = err.response?.data?.message || err.message || 'Error al guardar el usuario';
+      setErrors(prev => ({ ...prev, submit: msg }));
+    }
   };
 
   const getPasswordStrength = () => {
@@ -227,7 +242,6 @@ export const CreateUser = ({
           </div>
         </div>
 
-        {/* Formulario Lineal */}
         <form className="create-user-form" onSubmit={handleSubmit}>
           
           <div className="form-section-header">
@@ -349,17 +363,19 @@ export const CreateUser = ({
                   <span className="role-option-desc">Acceso a explorar destinos y recursos</span>
                 </div>
               </button>
-              <button
-                type="button"
-                className={`role-option ${formData.rol === 'ADMIN' ? 'active' : ''}`}
-                onClick={() => updateField('rol', 'ADMIN')}
-              >
-                <Shield size={20} />
-                <div className="role-option-text">
-                  <span className="role-option-name">Administrador</span>
-                  <span className="role-option-desc">Gestión completa de la plataforma</span>
-                </div>
-              </button>
+              {isCurrentUserAdmin && (
+                <button
+                  type="button"
+                  className={`role-option ${formData.rol === 'ADMIN' ? 'active' : ''}`}
+                  onClick={() => updateField('rol', 'ADMIN')}
+                >
+                  <Shield size={20} />
+                  <div className="role-option-text">
+                    <span className="role-option-name">Administrador</span>
+                    <span className="role-option-desc">Gestión completa de la plataforma</span>
+                  </div>
+                </button>
+              )}
             </div>
           </div>
 
@@ -367,7 +383,7 @@ export const CreateUser = ({
             <div className="form-field">
               <label className="form-label">
                 Contraseña {!isEditing && <span className="form-required">*</span>}
-                {isEditing && <span className="form-label-hint" style={{marginLeft: 8, fontSize: '0.8rem', color: 'var(--text-secondary)'}}>( Dejar en blanco para mantener actual)</span>}
+                {isEditing && <span className="form-label-hint" style={{marginLeft: 8, fontSize: '0.8rem', color: 'var(--text-secondary)'}}>(Dejar en blanco para mantener actual)</span>}
               </label>
               <div className="form-input-wrapper">
                 <Lock size={16} className="form-input-icon" />
@@ -458,6 +474,13 @@ export const CreateUser = ({
               </div>
             </label>
           </div>
+
+          {errors.submit && (
+            <div className="form-error submit-error" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--status-danger-text)', background: 'rgba(239, 68, 68, 0.1)', padding: '0.75rem', borderRadius: '0.375rem' }}>
+              <AlertCircle size={16} />
+              <span>{errors.submit}</span>
+            </div>
+          )}
 
           <div className="form-footer">
             <div className="form-footer-left">

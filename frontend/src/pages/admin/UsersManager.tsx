@@ -1,29 +1,28 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Search, Filter, Plus, Users, Globe, Activity, DollarSign,
   MoreHorizontal, User, ChevronDown, ChevronLeft, ChevronRight,
   X, UserCheck, UserX, Eye, Pencil, Trash2, Download
 } from 'lucide-react';
 import { CreateUser } from './CreateUser';
-
-const INITIAL_USERS = [
-  { id: 1, nombre: 'Daniel Ramirez', correo: 'daniel.ramirez@example.com', nacionalidad: 'El Salvador', presupuesto_estimado: 0, rol: 'ADMIN', activo: true, createdAt: '2026-05-10', password_hash: '' },
-  { id: 2, nombre: 'Sarah Johnson', correo: 'sarah.j@gmail.com', nacionalidad: 'Estados Unidos', presupuesto_estimado: 1200, rol: 'TURISTA', activo: true, createdAt: '2026-05-14', password_hash: '' }
-];
+import { usuarioService } from '../../services/usuarioService';
+import type { Usuario } from '../../services/usuarioService';
 
 const formatDate = (dateStr: string) => {
+  if (!dateStr) return '';
   const date = new Date(dateStr);
   return date.toLocaleDateString('es-SV', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+const formatCurrency = (amount?: number) => {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount || 0);
 };
 
 export const UsersManager = () => {
-  const [users, setUsers] = useState(INITIAL_USERS);
+  const [users, setUsers] = useState<Usuario[]>([]);
+  const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
-  const [editingUser, setEditingUser] = useState<any>(null);
+  const [editingUser, setEditingUser] = useState<Usuario | null>(null);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRol, setFilterRol] = useState<string>('TODOS');
@@ -31,78 +30,145 @@ export const UsersManager = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.correo.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRol = filterRol === 'TODOS' || user.rol === filterRol;
-    const matchesEstado = filterEstado === 'TODOS' ||
-      (filterEstado === 'ACTIVO' && user.activo) ||
-      (filterEstado === 'INACTIVO' && !user.activo);
-    return matchesSearch && matchesRol && matchesEstado;
-  });
+  const loadUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await usuarioService.listar(0, 1000);
+      if (response.success && response.data) {
+        setUsers(response.data.contenido || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const totalUsuarios = users.length;
-  const turistasActivos = users.filter(u => u.rol === 'TURISTA' && u.activo).length;
-  const nacionalidades = new Set(users.map(u => u.nacionalidad).filter(Boolean)).size;
-  const presupuestoPromedio = Math.round(
-    users.filter(u => Number(u.presupuesto_estimado) > 0).reduce((sum, u) => sum + Number(u.presupuesto_estimado), 0) /
-    (users.filter(u => Number(u.presupuesto_estimado) > 0).length || 1)
-  );
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
-  const handleSaveUser = (data: any) => {
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => {
+      const matchesSearch = (user.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (user.correo || '').toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesRol = filterRol === 'TODOS' || user.rol === filterRol;
+      const matchesEstado = filterEstado === 'TODOS' ||
+        (filterEstado === 'ACTIVO' && user.activo) ||
+        (filterEstado === 'INACTIVO' && !user.activo);
+      return matchesSearch && matchesRol && matchesEstado;
+    });
+  }, [users, searchTerm, filterRol, filterEstado]);
+
+  const stats = useMemo(() => {
+    const total = users.length;
+    const activos = users.filter(u => u.rol === 'TURISTA' && u.activo).length;
+    const nacs = new Set(users.map(u => u.nacionalidad).filter(Boolean)).size;
+    
+    const usersWithBudget = users.filter(u => u.presupuestoEstimado !== undefined && Number(u.presupuestoEstimado) > 0);
+    const avg = usersWithBudget.length > 0 
+      ? Math.round(usersWithBudget.reduce((sum, u) => sum + Number(u.presupuestoEstimado || 0), 0) / usersWithBudget.length)
+      : 0;
+
+    return { total, activos, nacs, avg };
+  }, [users]);
+
+  const paginatedUsers = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredUsers, currentPage]);
+
+  const totalPages = useMemo(() => {
+    return Math.ceil(filteredUsers.length / itemsPerPage) || 1;
+  }, [filteredUsers]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterRol, filterEstado]);
+
+  const handleSaveUser = useCallback(async (data: any) => {
+    const payload = {
+      nombre: data.nombre,
+      correo: data.correo,
+      nacionalidad: data.nacionalidad || undefined,
+      presupuestoEstimado: data.presupuesto_estimado ? Number(data.presupuesto_estimado) : undefined,
+      rol: data.rol,
+      activo: data.activo,
+      password: data.password || undefined
+    };
+
     if (view === 'edit' && editingUser) {
-      setUsers(users.map(u => u.id === editingUser.id ? { ...u, ...data, presupuesto_estimado: Number(data.presupuesto_estimado || 0) } : u));
+      await usuarioService.actualizar(editingUser.idUsuario, payload);
     } else {
-      setUsers([{
-        id: Date.now(),
-        ...data,
-        presupuesto_estimado: Number(data.presupuesto_estimado || 0),
-        createdAt: new Date().toISOString()
-      }, ...users]);
+      await usuarioService.crear(payload);
     }
+    await loadUsers();
     setView('list');
-  };
+  }, [view, editingUser, loadUsers]);
 
-  const handleDeleteUser = (id: number) => {
-    if (confirm('¿Estás seguro de eliminar este usuario?')) {
-      setUsers(users.filter(u => u.id !== id));
-      setSelectedUsers(selectedUsers.filter(selectedId => selectedId !== id));
-      setOpenMenuId(null);
+  const handleDeleteUser = useCallback(async (id: number) => {
+    if (window.confirm('¿Estás seguro de eliminar este usuario?')) {
+      try {
+        await usuarioService.eliminar(id);
+        await loadUsers();
+        setSelectedUsers(prev => prev.filter(selectedId => selectedId !== id));
+        setOpenMenuId(null);
+      } catch (err: any) {
+        alert(err.response?.data?.message || err.message || 'Error al eliminar el usuario');
+      }
     }
-  };
+  }, [loadUsers]);
 
-  const handleToggleActive = (id: number) => {
-    setUsers(users.map(u => u.id === id ? { ...u, activo: !u.activo } : u));
-    setOpenMenuId(null);
-  };
+  const handleToggleActive = useCallback(async (id: number) => {
+    const userToToggle = users.find(u => u.idUsuario === id);
+    if (!userToToggle) return;
+    try {
+      await usuarioService.actualizar(id, {
+        nombre: userToToggle.nombre,
+        correo: userToToggle.correo,
+        rol: userToToggle.rol,
+        activo: !userToToggle.activo,
+        nacionalidad: userToToggle.nacionalidad,
+        presupuestoEstimado: userToToggle.presupuestoEstimado
+      });
+      await loadUsers();
+      setOpenMenuId(null);
+    } catch (err: any) {
+      alert(err.response?.data?.message || err.message || 'Error al actualizar estado del usuario');
+    }
+  }, [users, loadUsers]);
 
-  const toggleSelectAll = () => {
+  const toggleSelectAll = useCallback(() => {
     if (selectedUsers.length === filteredUsers.length) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(filteredUsers.map(u => u.id));
+      setSelectedUsers(filteredUsers.map(u => u.idUsuario));
     }
-  };
+  }, [selectedUsers, filteredUsers]);
 
-  const toggleSelectUser = (id: number) => {
+  const toggleSelectUser = useCallback((id: number) => {
     setSelectedUsers(prev =>
       prev.includes(id) ? prev.filter(uid => uid !== id) : [...prev, id]
     );
-  };
+  }, []);
 
-  const activeFilterCount = [filterRol !== 'TODOS', filterEstado !== 'TODOS'].filter(Boolean).length;
+  const activeFilterCount = useMemo(() => {
+    return [filterRol !== 'TODOS', filterEstado !== 'TODOS'].filter(Boolean).length;
+  }, [filterRol, filterEstado]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setFilterRol('TODOS');
     setFilterEstado('TODOS');
     setSearchTerm('');
-  };
+  }, []);
 
   if (view === 'create' || view === 'edit') {
     return (
       <CreateUser
-        userToEdit={editingUser}
+        userToEdit={editingUser || undefined}
         onSave={handleSaveUser}
         onCancel={() => setView('list')}
       />
@@ -136,7 +202,7 @@ export const UsersManager = () => {
               <Users size={18} />
             </div>
           </div>
-          <div className="stat-value">{totalUsuarios.toLocaleString()}</div>
+          <div className="stat-value">{stats.total.toLocaleString()}</div>
           <div className="stat-subtitle">Registrados en el sistema</div>
         </div>
 
@@ -147,7 +213,7 @@ export const UsersManager = () => {
               <Activity size={18} />
             </div>
           </div>
-          <div className="stat-value">{turistasActivos.toLocaleString()}</div>
+          <div className="stat-value">{stats.activos.toLocaleString()}</div>
           <div className="stat-subtitle">Con cuenta habilitada</div>
         </div>
 
@@ -158,7 +224,7 @@ export const UsersManager = () => {
               <Globe size={18} />
             </div>
           </div>
-          <div className="stat-value">{nacionalidades}</div>
+          <div className="stat-value">{stats.nacs}</div>
           <div className="stat-subtitle">Países de origen distintos</div>
         </div>
 
@@ -169,7 +235,7 @@ export const UsersManager = () => {
               <DollarSign size={18} />
             </div>
           </div>
-          <div className="stat-value">{formatCurrency(presupuestoPromedio)}</div>
+          <div className="stat-value">{formatCurrency(stats.avg)}</div>
           <div className="stat-subtitle">Estimado por turista</div>
         </div>
       </div>
@@ -287,7 +353,16 @@ export const UsersManager = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={9} className="empty-state">
+                    <div className="empty-state-content">
+                      <div className="btn-spinner" style={{ width: '2rem', height: '2rem', margin: '0 auto 1rem' }} />
+                      <p>Cargando usuarios...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="empty-state">
                     <div className="empty-state-content">
@@ -298,14 +373,14 @@ export const UsersManager = () => {
                   </td>
                 </tr>
               ) : (
-                filteredUsers.map(user => (
-                  <tr key={user.id} className={selectedUsers.includes(user.id) ? 'row-selected' : ''}>
+                paginatedUsers.map(user => (
+                  <tr key={user.idUsuario} className={selectedUsers.includes(user.idUsuario) ? 'row-selected' : ''}>
                     <td className="td-checkbox">
                       <input
                         type="checkbox"
                         className="custom-checkbox"
-                        checked={selectedUsers.includes(user.id)}
-                        onChange={() => toggleSelectUser(user.id)}
+                        checked={selectedUsers.includes(user.idUsuario)}
+                        onChange={() => toggleSelectUser(user.idUsuario)}
                       />
                     </td>
                     <td>
@@ -317,8 +392,8 @@ export const UsersManager = () => {
                       </div>
                     </td>
                     <td className="td-email">{user.correo}</td>
-                    <td>{user.nacionalidad}</td>
-                    <td className="td-currency">{formatCurrency(user.presupuesto_estimado)}</td>
+                    <td>{user.nacionalidad || '-'}</td>
+                    <td className="td-currency">{formatCurrency(user.presupuestoEstimado)}</td>
                     <td>
                       <span className={`badge ${user.rol === 'ADMIN' ? 'badge-purple' : 'badge-info'}`}>
                         {user.rol}
@@ -341,17 +416,17 @@ export const UsersManager = () => {
                         </button>
                         <button
                           className="action-btn action-more"
-                          onClick={() => setOpenMenuId(openMenuId === user.id ? null : user.id)}
+                          onClick={() => setOpenMenuId(openMenuId === user.idUsuario ? null : user.idUsuario)}
                         >
                           <MoreHorizontal size={15} />
                         </button>
-                        {openMenuId === user.id && (
+                        {openMenuId === user.idUsuario && (
                           <div className="dropdown-menu" onMouseLeave={() => setOpenMenuId(null)}>
-                            <button className="dropdown-item" onClick={() => handleToggleActive(user.id)}>
+                            <button className="dropdown-item" onClick={() => handleToggleActive(user.idUsuario)}>
                               {user.activo ? <UserX size={14} /> : <UserCheck size={14} />}
                               <span>{user.activo ? 'Desactivar' : 'Activar'}</span>
                             </button>
-                            <button className="dropdown-item dropdown-item-danger" onClick={() => handleDeleteUser(user.id)}>
+                            <button className="dropdown-item dropdown-item-danger" onClick={() => handleDeleteUser(user.idUsuario)}>
                               <Trash2 size={14} />
                               <span>Eliminar</span>
                             </button>
@@ -368,18 +443,30 @@ export const UsersManager = () => {
 
         <div className="table-footer">
           <div className="table-footer-info">
-            Mostrando <strong>{filteredUsers.length}</strong> de <strong>{totalUsuarios}</strong> usuarios
+            Mostrando <strong>{paginatedUsers.length}</strong> de <strong>{filteredUsers.length}</strong> usuarios
           </div>
           <div className="table-pagination">
-            <button className="pagination-btn" disabled>
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
               <ChevronLeft size={16} />
             </button>
-            <button className="pagination-btn pagination-active">1</button>
-            <button className="pagination-btn">2</button>
-            <button className="pagination-btn">3</button>
-            <span className="pagination-ellipsis">...</span>
-            <button className="pagination-btn">12</button>
-            <button className="pagination-btn">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+              <button
+                key={pageNum}
+                className={`pagination-btn ${currentPage === pageNum ? 'pagination-active' : ''}`}
+                onClick={() => setCurrentPage(pageNum)}
+              >
+                {pageNum}
+              </button>
+            ))}
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
               <ChevronRight size={16} />
             </button>
           </div>

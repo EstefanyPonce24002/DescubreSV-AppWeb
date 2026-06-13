@@ -1,19 +1,43 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export const Login = () => {
   const navigate = useNavigate();
+  const { login, isAuthenticated, user } = useAuth();
+  const [correo, setCorreo] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.rol === 'ADMIN') {
+        navigate('/admin/users');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
+    setLocalError(null);
+    try {
+      const authData = await login({ correo, password });
+      if (authData.rol === 'ADMIN') {
+        navigate('/admin/users');
+      } else {
+        navigate('/');
+      }
+    } catch (err: any) {
+      setLocalError(err.message || 'Credenciales inválidas');
+    } finally {
       setIsLoading(false);
-      navigate('/admin/users');
-    }, 800);
+    }
   };
 
   return (
@@ -34,6 +58,12 @@ export const Login = () => {
             <p className="login-subtitle">Ingresa a tu cuenta de administrador</p>
           </div>
 
+          {localError && (
+            <div className="mb-4 p-3 rounded bg-red-950/40 border border-red-800 text-red-200 text-sm text-center">
+              {localError}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="login-form">
             <div className="login-field">
               <label className="login-label">Correo Electrónico</label>
@@ -42,6 +72,8 @@ export const Login = () => {
                 <input
                   type="email"
                   required
+                  value={correo}
+                  onChange={(e) => setCorreo(e.target.value)}
                   className="login-input"
                   placeholder="admin@descubresv.com"
                   autoComplete="email"
@@ -59,6 +91,8 @@ export const Login = () => {
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="login-input"
                   placeholder="••••••••••"
                   autoComplete="current-password"

@@ -1,12 +1,20 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Users, LogOut, Shield, Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Users, LogOut, Shield, Menu, X, Layers, Compass } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 
 export const AdminSidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname.includes(path);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <>
@@ -56,11 +64,27 @@ export const AdminSidebar = () => {
               <Users size={18} />
               <span>Gestión de Usuarios</span>
             </Link>
+            <Link
+              to="/admin/categories"
+              className={`sidebar-nav-item ${isActive('/admin/categories') ? 'active' : ''}`}
+              onClick={() => setIsOpen(false)}
+            >
+              <Layers size={18} />
+              <span>Categorías</span>
+            </Link>
+            <Link
+              to="/admin/destinations"
+              className={`sidebar-nav-item ${isActive('/admin/destinations') ? 'active' : ''}`}
+              onClick={() => setIsOpen(false)}
+            >
+              <Compass size={18} />
+              <span>Destinos</span>
+            </Link>
           </div>
         </div>
 
         <div className="sidebar-footer">
-          <button className="sidebar-nav-item">
+          <button className="sidebar-nav-item" onClick={handleLogout}>
             <LogOut size={18} />
             <span>Cerrar Sesión</span>
           </button>

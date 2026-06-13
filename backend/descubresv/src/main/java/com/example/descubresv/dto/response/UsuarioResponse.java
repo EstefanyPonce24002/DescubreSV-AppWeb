@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -22,6 +23,8 @@ public class UsuarioResponse {
     private String avatarUrl;
     private RolUsuario rol;
     private Boolean activo;
+    private BigDecimal presupuestoEstimado;
+    private String preferencias;
     private LocalDateTime createdAt;
 
     public static UsuarioResponse fromEntity(Usuario usuario) {
@@ -33,6 +36,8 @@ public class UsuarioResponse {
                 .avatarUrl(usuario.getAvatarUrl())
                 .rol(usuario.getRol())
                 .activo(usuario.getActivo())
+                .presupuestoEstimado(usuario.getPresupuestoEstimado())
+                .preferencias(usuario.getPreferencias())
                 .createdAt(usuario.getCreatedAt())
                 .build();
     }
