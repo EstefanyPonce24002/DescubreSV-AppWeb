@@ -4,6 +4,9 @@ import {
   Star, ChevronRight, Sparkles, Mountain, Waves, TreePine
 } from 'lucide-react';
 
+// 🚀 1. IMPORTAMOS TU COMPONENTE DE RESEÑAS REALES
+import { SeccionResenas } from '../../components/SeccionResenas';
+
 const STATS = [
   { value: '200+', label: 'Destinos', icon: MapPin },
   { value: '50K+', label: 'Turistas', icon: Users },
@@ -15,7 +18,7 @@ const FEATURES = [
   {
     icon: Compass,
     title: 'Exploración Inteligente',
-    description: 'Encuentra destinos según tus preferencias, presupuesto y estilo de viaje con recomendaciones personalizadas.',
+    description: 'Encuentra destinos según tus preferencias, presupuesto y estilo de viaje con recommendations personalizadas.',
   },
   {
     icon: Shield,
@@ -84,7 +87,7 @@ export const Home = () => {
           </h1>
           <p className="hero-subtitle">
             Explora volcanes majestuosos, playas paradisíacas y pueblos con siglos de
-            historia. Tu próxima aventura comienza aquí.
+            history. Tu próxima aventura comienza aquí.
           </p>
           <div className="hero-actions">
             <Link to="/explore" className="btn-hero-primary">
@@ -146,7 +149,7 @@ export const Home = () => {
             <h2 className="section-title">Todo lo que necesitas para tu viaje</h2>
             <p className="section-description">
               Herramientas diseñadas para hacer tu experiencia de viaje
-              inolvidable desde la planificación hasta el regreso.
+              inolvidadle desde la planificación hasta el regreso.
             </p>
           </div>
           <div className="features-grid">
@@ -194,6 +197,12 @@ export const Home = () => {
               </div>
             ))}
           </div>
+
+          {/* 🚀 2. TU SECCIÓN DE COMENTARIOS VIVOS LIMPIA Y DINÁMICA */}
+          <div style={{ marginTop: '50px' }}>
+            <SeccionResenas />
+          </div>
+
         </div>
       </section>
 
