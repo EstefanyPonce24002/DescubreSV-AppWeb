@@ -24,13 +24,16 @@ export const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
+        {/* 🌍 ZONA PÚBLICA */}
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<Home />} />
           <Route path="explore" element={<Explore />} />
         </Route>
         
+        {/* 🔐 AUTENTICACIÓN */}
         <Route path="/login" element={<Login />} />
 
+        {/* 🛠️ PANEL DE ADMINISTRACIÓN */}
         <Route
           path="/admin"
           element={

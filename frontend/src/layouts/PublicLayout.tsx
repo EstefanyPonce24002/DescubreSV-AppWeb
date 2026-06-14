@@ -7,6 +7,7 @@ export const PublicLayout = () => {
     <div className="layout-public">
       <PublicNavbar />
       <main className="public-main">
+        {/* Aquí es donde React renderizará tu Sección de Reseñas */}
         <Outlet />
       </main>
       <PublicFooter />
