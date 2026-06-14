@@ -9,6 +9,7 @@ import { Home } from '../pages/public/Home';
 import { Explore } from '../pages/public/Explore';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { useAuth } from '../context/AuthContext';
+import { ItinerariosManager } from '../pages/admin/ItinerariosManager';
 
 const DefaultRedirect = () => {
   const { isAuthenticated, user } = useAuth();
@@ -24,19 +25,17 @@ export const AppRouter = () => {
   return (
     <BrowserRouter>
       <Routes>
-        {/* 🌍 ZONA PÚBLICA */}
+        {/*ZONA PÚBLICA */}
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<Home />} />
           <Route path="explore" element={<Explore />} />
         </Route>
         
-        {/* 🔐 AUTENTICACIÓN */}
+        {/*AUTENTICACIÓN */}
         <Route path="/login" element={<Login />} />
 
         {/* 🛠️ PANEL DE ADMINISTRACIÓN */}
-        <Route
-          path="/admin"
-          element={
+        <Route path="/admin" element={
             <ProtectedRoute allowedRoles={['ADMIN']}>
               <AdminLayout />
             </ProtectedRoute>
@@ -46,6 +45,7 @@ export const AppRouter = () => {
           <Route path="users" element={<UsersManager />} />
           <Route path="categories" element={<CategoriesManager />} />
           <Route path="destinations" element={<DestinationsManager />} />
+          <Route path="itinerarios" element={<ItinerariosManager />} />
         </Route>
 
         <Route path="*" element={<DefaultRedirect />} />

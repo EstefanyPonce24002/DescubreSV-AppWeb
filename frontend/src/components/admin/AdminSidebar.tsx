@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Users, LogOut, Shield, Menu, X, Layers, Compass } from 'lucide-react';
+import { Users, LogOut, Shield, Menu, X, Layers, Compass, Map } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const AdminSidebar = () => {
@@ -80,6 +80,16 @@ export const AdminSidebar = () => {
               <Compass size={18} />
               <span>Destinos</span>
             </Link>
+          
+            <Link
+              to="/admin/itinerarios"
+              className={`sidebar-nav-item ${isActive('/admin/itinerarios') ? 'active' : ''}`}
+              onClick={() => setIsOpen(false)}
+            >
+              <Map size={18} />
+              <span>Itinerarios</span>
+            </Link>
+
           </div>
         </div>
 
