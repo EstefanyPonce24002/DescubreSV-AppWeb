@@ -21,7 +21,7 @@ export const useResenas = () => {
     const [cargando, setCargando] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
-    // 🎯 CLAVE: Usamos useCallback para que la función mantenga su referencia en memoria
+    // CLAVE: Usamos useCallback para que la función mantenga su referencia en memoria
     // Esto evita que SeccionResenas entre en un bucle infinito al renderizar
     const obtenerResenas = useCallback(async (idDestino: number) => {
         setCargando(true);

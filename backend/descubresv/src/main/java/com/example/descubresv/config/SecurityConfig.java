@@ -40,8 +40,8 @@ public class SecurityConfig {
     private String[] origenes;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter,
-                          JwtAuthenticationEntryPoint jwtEntryPoint,
-                          JwtAccessDeniedHandler jwtAccessDeniedHandler) {
+            JwtAuthenticationEntryPoint jwtEntryPoint,
+            JwtAccessDeniedHandler jwtAccessDeniedHandler) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.jwtEntryPoint = jwtEntryPoint;
         this.jwtAccessDeniedHandler = jwtAccessDeniedHandler;
@@ -50,24 +50,31 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.cors(cors -> cors.configurationSource(corsSource()))
-            .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
-                .ignoringRequestMatchers("/api/**", "/swagger-ui/**", "/v3/api-docs/**"))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint(jwtEntryPoint)
-                .accessDeniedHandler(jwtAccessDeniedHandler))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
-                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/api/public/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/destinos/**", "/api/categorias/**").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/turista/**").hasRole("TURISTA")
-                .anyRequest().authenticated())
-            .addFilterAfter(new CsrfCookieFilter(), UsernamePasswordAuthenticationFilter.class)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                        .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler())
+                        .ignoringRequestMatchers("/api/**", "/swagger-ui/**", "/v3/api-docs/**"))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(jwtEntryPoint)
+                        .accessDeniedHandler(jwtAccessDeniedHandler))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/public/**").permitAll()
+
+                        // Permitir acceso público a destinos y categorías
+                        .requestMatchers(HttpMethod.GET, "/api/destinos/**", "/api/categorias/**", "/api/resenas/**")
+                        .permitAll()
+                        // Permitir acceso público a las reseñas para que los turistas puedan verlas sin
+                        // autenticación
+
+                        .requestMatchers(HttpMethod.GET, "/api/destinos/**", "/api/categorias/**").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/turista/**").hasRole("TURISTA")
+                        .anyRequest().authenticated())
+                .addFilterAfter(new CsrfCookieFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

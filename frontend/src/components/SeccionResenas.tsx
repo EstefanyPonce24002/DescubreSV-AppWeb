@@ -16,7 +16,7 @@ export const SeccionResenas = () => {
 
     const { resenas, cargando, error, obtenerResenas, crearResena } = useResenas();
 
-    // 🚀 Petición adaptada a la estructura exacta de tu backend Spring Boot
+    //Petición adaptada a la estructura exacta de tu backend Spring Boot
     useEffect(() => {
         const cargarDestinos = async () => {
             try {
@@ -24,7 +24,7 @@ export const SeccionResenas = () => {
                 if (respuesta.ok) {
                     const datos = await respuesta.json();
 
-                    // 🎯 Extraemos el array desde datos.data.contenido basado en tu consola
+                    //Extraemos el array desde datos.data.contenido basado en tu consola
                     if (datos && datos.data && Array.isArray(datos.data.contenido)) {
                         const listaDestinos = datos.data.contenido;
                         setDestinos(listaDestinos);
@@ -78,7 +78,7 @@ export const SeccionResenas = () => {
                 {error && <p style={{ color: '#ef4444', marginBottom: '10px' }}>{error}</p>}
                 {envioExitoso && <p style={{ color: '#10b981', marginBottom: '10px' }}>¡Reseña publicada con éxito!</p>}
 
-                {/* 🎯 LISTA DESPLEGABLE CONECTADA */}
+                {/*LISTA DESPLEGABLE CONECTADA */}
                 <div style={{ marginBottom: '15px' }}>
                     <label style={{ display: 'block', marginBottom: '5px' }}>¿Qué destino deseas evaluar?</label>
                     <select

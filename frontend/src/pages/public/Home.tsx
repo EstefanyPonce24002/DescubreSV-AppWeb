@@ -4,7 +4,7 @@ import {
   Star, ChevronRight, Sparkles, Mountain, Waves, TreePine
 } from 'lucide-react';
 
-// 🚀 1. IMPORTAMOS TU COMPONENTE DE RESEÑAS REALES
+// IMPORTAMOS COMPONENTE DE RESEÑAS REALES
 import { SeccionResenas } from '../../components/SeccionResenas';
 
 const STATS = [
@@ -198,7 +198,7 @@ export const Home = () => {
             ))}
           </div>
 
-          {/* 🚀 2. TU SECCIÓN DE COMENTARIOS VIVOS LIMPIA Y DINÁMICA */}
+          {/* SECCIÓN DE COMENTARIOS VIVOS LIMPIA Y DINÁMICA */}
           <div style={{ marginTop: '50px' }}>
             <SeccionResenas />
           </div>
