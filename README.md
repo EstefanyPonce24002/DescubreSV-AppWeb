@@ -294,20 +294,18 @@ Cliente (React)                    Backend (Spring Boot)
 > Las capturas de pantalla de Swagger UI y la interfaz de usuario se encuentran en la carpeta `/docs/evidencias/` del repositorio.
 
 ### Swagger UI
-
-![Swagger UI](docs/evidencias/swagger-ui.png)
+<img width="1465" height="679" alt="swagger-ui" src="https://github.com/user-attachments/assets/fe578cc8-1062-4275-bc6b-17957b14c48d" />
 
 ### Login y generación de token JWT
-
-![Login JWT](docs/evidencias/login-jwt.png)
+<img width="1458" height="789" alt="login-jwt-1" src="https://github.com/user-attachments/assets/4954fcec-cf25-479a-b397-05733f9ee60d" />
+<img width="1355" height="576" alt="login-jwt-2" src="https://github.com/user-attachments/assets/6515f398-a417-4c03-8364-aa92eb835d62" />
 
 ### Panel de Administración
-
-![Admin Dashboard](docs/evidencias/admin-dashboard.png)
+<img width="1365" height="709" alt="admin-dashboard-1" src="https://github.com/user-attachments/assets/37adf41e-a4b6-4e6d-bae5-81e07c284101" />
+<img width="1363" height="508" alt="admin-dashboard-2" src="https://github.com/user-attachments/assets/56176df4-4f69-48cc-add8-ba8511204883" />
 
 ### Vista de Destinos (Frontend React)
-
-![Destinos](docs/evidencias/destinos-view.png)
+<img width="1216" height="851" alt="destinos-view" src="https://github.com/user-attachments/assets/19d613a1-dcaa-495b-bb6e-a8b42d1d78c9" />
 
 ---
 
