@@ -175,6 +175,34 @@ JWT_SECRET: tu_clave_secreta_aqui
 
 ---
 
+## Como Ejecutar en Frontend (React + Vite)
+
+**1. Ir a la carpeta del frontend:**
+   
+```bash
+cd frontend
+```
+
+**2. Instalar dependencias:**
+
+```bash
+npm install
+```
+
+**3. Ejecutar en modo desarrollo:**
+
+```bash
+npm run dev
+```
+
+Requiere Node.js 18+ y npm.
+
+**4. La aplicación estará disponible en:**
+
+Abrir en el navegador:```bash http://localhost:5173.```
+
+---
+
 ## 🔌 Tabla de Endpoints (API REST)
 
 ### 🔐 Autenticación
