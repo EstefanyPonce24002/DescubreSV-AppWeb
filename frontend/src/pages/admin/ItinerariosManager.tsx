@@ -1,29 +1,30 @@
-import { useState, useEffect } from 'react';
-import { Plus, Search, ChevronLeft, ChevronRight, Pencil, Trash2, X, Calendar, DollarSign, Map, MapPin } from 'lucide-react';
-import { itinerarioService, ItinerarioResponse } from '../../services/itinerarioService';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { Plus, Search, ChevronLeft, ChevronRight, Pencil, Trash2, Calendar, DollarSign, Map, MapPin, X } from 'lucide-react';
+import { itinerarioService, type ItinerarioResponse } from '../../services/itinerarioService';
 import { CreateItinerario } from './CreateItinerario';
 import { PresupuestoModal } from '../../components/admin/PresupuestoModal';
 import { DestinosItinerarioModal } from '../../components/admin/DestinosItinerarioModal';
+import { useNotification } from '../../context/NotificationContext';
 
 export function ItinerariosManager() {
+  const { showNotification } = useNotification();
   const [itinerarios, setItinerarios] = useState<ItinerarioResponse[]>([]);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
-  
+
   const [isLoading, setIsLoading] = useState(false);
   const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
   const [editingItinerario, setEditingItinerario] = useState<ItinerarioResponse | null>(null);
 
-  // Estados de Modales Secundarios
   const [isPresupuestoOpen, setIsPresupuestoOpen] = useState(false);
   const [isDestinosOpen, setIsDestinosOpen] = useState(false);
   const [selectedItinerarioId, setSelectedItinerarioId] = useState<number | null>(null);
   const [selectedItinerarioName, setSelectedItinerarioName] = useState<string>('');
 
-  const fetchItinerarios = async () => {
+  const fetchItinerarios = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await itinerarioService.listarTodos(currentPage, pageSize);
@@ -33,26 +34,35 @@ export function ItinerariosManager() {
         setTotalPages(response.data.totalPaginas);
       }
     } catch (err) {
-      console.error("Error al cargar itinerarios", err);
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, pageSize]);
 
   useEffect(() => {
     fetchItinerarios();
-  }, [currentPage, pageSize]);
+  }, [fetchItinerarios]);
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Al eliminar este itinerario, también se borrará su presupuesto y rutas (Cascade). ¿Continuar?')) {
+  const handleDelete = useCallback(async (id: number) => {
+    if (window.confirm('Al eliminar este itinerario, también se borrará su presupuesto y rutas (Cascade). ¿Continuar?')) {
       try {
         await itinerarioService.eliminar(id);
+        showNotification('Itinerario eliminado correctamente.', 'success');
         fetchItinerarios();
       } catch (err: any) {
-        alert('Error al eliminar el itinerario.');
+        showNotification('Error al eliminar el itinerario.', 'error');
       }
     }
-  };
+  }, [fetchItinerarios, showNotification]);
+
+  const filteredItinerarios = useMemo(() => {
+    if (!searchTerm) return itinerarios;
+    return itinerarios.filter(it =>
+      (it.nombre || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (it.nombreUsuario || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [itinerarios, searchTerm]);
 
   if (view === 'create' || view === 'edit') {
     return (
@@ -73,12 +83,33 @@ export function ItinerariosManager() {
         </div>
         <div className="page-header-actions">
           <button className="btn-primary" onClick={() => { setEditingItinerario(null); setView('create'); }}>
-            <Plus size={16} /><span>Nuevo Viaje</span>
+            <Plus size={16} />
+            <span>Nuevo Viaje</span>
           </button>
         </div>
       </div>
 
       <div className="data-table-container">
+        <div className="data-table-toolbar">
+          <div className="toolbar-left">
+            <div className="search-input-wrapper">
+              <Search size={16} className="search-icon" />
+              <input
+                type="text"
+                placeholder="Buscar por nombre o creador..."
+                className="search-input"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button className="search-clear" onClick={() => setSearchTerm('')}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
         <div className="table-wrapper">
           <table className="data-table">
             <thead>
@@ -94,9 +125,12 @@ export function ItinerariosManager() {
             <tbody>
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="empty-state"><div className="login-spinner" /></td>
+                  <td colSpan={6} className="empty-state">
+                    <div className="btn-spinner" style={{ width: '2rem', height: '2rem', margin: '0 auto 1rem' }} />
+                    <p>Cargando itinerarios...</p>
+                  </td>
                 </tr>
-              ) : itinerarios.length === 0 ? (
+              ) : filteredItinerarios.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="empty-state">
                     <Map size={40} />
@@ -104,7 +138,7 @@ export function ItinerariosManager() {
                   </td>
                 </tr>
               ) : (
-                itinerarios.map(it => (
+                filteredItinerarios.map(it => (
                   <tr key={it.idItinerario}>
                     <td>#{it.idItinerario}</td>
                     <td><strong>{it.nombre}</strong></td>
@@ -122,19 +156,43 @@ export function ItinerariosManager() {
                     </td>
                     <td className="td-actions">
                       <div className="actions-wrapper">
-                        {/* 1. Ruta / Destinos */}
-                        <button className="action-btn" title="Armar Ruta (Destinos)" onClick={() => { setSelectedItinerarioId(it.idItinerario); setSelectedItinerarioName(it.nombre); setIsDestinosOpen(true); }}>
+                        <button
+                          className="action-btn"
+                          title="Armar Ruta (Destinos)"
+                          onClick={() => {
+                            setSelectedItinerarioId(it.idItinerario);
+                            setSelectedItinerarioName(it.nombre);
+                            setIsDestinosOpen(true);
+                          }}
+                        >
                           <MapPin size={15} style={{ color: 'var(--color-primary)' }} />
                         </button>
-                        {/* 2. Presupuesto */}
-                        <button className="action-btn" title="Desglose de Presupuesto" onClick={() => { setSelectedItinerarioId(it.idItinerario); setSelectedItinerarioName(it.nombre); setIsPresupuestoOpen(true); }}>
+                        <button
+                          className="action-btn"
+                          title="Desglose de Presupuesto"
+                          onClick={() => {
+                            setSelectedItinerarioId(it.idItinerario);
+                            setSelectedItinerarioName(it.nombre);
+                            setIsPresupuestoOpen(true);
+                          }}
+                        >
                           <DollarSign size={15} style={{ color: 'var(--color-success)' }} />
                         </button>
-                        {/* 3. Datos Base */}
-                        <button className="action-btn" title="Editar Datos Base" onClick={() => { setEditingItinerario(it); setView('edit'); }}>
+                        <button
+                          className="action-btn"
+                          title="Editar Datos Base"
+                          onClick={() => {
+                            setEditingItinerario(it);
+                            setView('edit');
+                          }}
+                        >
                           <Pencil size={15} />
                         </button>
-                        <button className="action-btn" title="Eliminar Viaje Completo" onClick={() => handleDelete(it.idItinerario)}>
+                        <button
+                          className="action-btn"
+                          title="Eliminar Viaje Completo"
+                          onClick={() => handleDelete(it.idItinerario)}
+                        >
                           <Trash2 size={15} style={{ color: 'var(--color-danger)' }} />
                         </button>
                       </div>
@@ -145,9 +203,39 @@ export function ItinerariosManager() {
             </tbody>
           </table>
         </div>
+
+        <div className="table-footer">
+          <div className="table-footer-info">
+            Mostrando <strong>{filteredItinerarios.length}</strong> de <strong>{totalElements}</strong> itinerarios
+          </div>
+          <div className="table-pagination">
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 0))}
+              disabled={currentPage === 0}
+            >
+              <ChevronLeft size={16} />
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i).map(pageNum => (
+              <button
+                key={pageNum}
+                className={`pagination-btn ${currentPage === pageNum ? 'pagination-active' : ''}`}
+                onClick={() => setCurrentPage(pageNum)}
+              >
+                {pageNum + 1}
+              </button>
+            ))}
+            <button
+              className="pagination-btn"
+              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages - 1))}
+              disabled={currentPage === totalPages - 1 || totalPages === 0}
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Renderizado Condicional de los Modales (Solo se abren si hay un ID seleccionado) */}
       {isPresupuestoOpen && selectedItinerarioId && (
         <PresupuestoModal
           idItinerario={selectedItinerarioId}

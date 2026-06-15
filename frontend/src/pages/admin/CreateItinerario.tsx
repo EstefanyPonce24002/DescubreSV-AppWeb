@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, Save } from 'lucide-react';
-import { itinerarioService, ItinerarioRequest, ItinerarioResponse } from '../../services/itinerarioService';
+import { itinerarioService, type ItinerarioRequest, type ItinerarioResponse } from '../../services/itinerarioService';
+import { useNotification } from '../../context/NotificationContext';
 
 interface CreateItinerarioProps {
   itinerarioToEdit?: ItinerarioResponse;
@@ -9,6 +10,7 @@ interface CreateItinerarioProps {
 }
 
 export function CreateItinerario({ itinerarioToEdit, onSave, onCancel }: CreateItinerarioProps) {
+  const { showNotification } = useNotification();
   const [formData, setFormData] = useState<ItinerarioRequest>({
     idUsuario: 1, // Nota: Idealmente obtener del AuthContext
     nombre: '',
@@ -47,12 +49,14 @@ export function CreateItinerario({ itinerarioToEdit, onSave, onCancel }: CreateI
     try {
       if (itinerarioToEdit) {
         await itinerarioService.actualizar(itinerarioToEdit.idItinerario, formData);
+        showNotification('Itinerario actualizado exitosamente.', 'success');
       } else {
         await itinerarioService.crear(formData);
+        showNotification('Itinerario creado exitosamente.', 'success');
       }
       onSave();
     } catch (error) {
-      alert('Error al guardar el itinerario. Verifique los datos.');
+      showNotification('Error al guardar el itinerario. Verifique los datos.', 'error');
     } finally {
       setIsSubmitting(false);
     }

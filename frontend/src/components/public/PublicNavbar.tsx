@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Shield, ChevronDown, LogOut, User } from 'lucide-react';
+import { Menu, X, Shield, ChevronDown, LogOut, User, Briefcase } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 export const PublicNavbar = () => {
@@ -43,8 +43,7 @@ export const PublicNavbar = () => {
   const navLinks = [
     { to: '/', label: 'Inicio' },
     { to: '/explore', label: 'Explorar' },
-    { to: '/#features', label: 'Características' },
-    { to: '/#about', label: 'Nosotros' },
+    ...(isAuthenticated && user?.rol === 'TURISTA' ? [{ to: '/my-trips', label: 'Mis Viajes' }] : []),
   ];
 
   return (
@@ -73,6 +72,11 @@ export const PublicNavbar = () => {
                 {user?.rol === 'ADMIN' && (
                   <Link to="/admin" className="navbar-link" style={{ display: 'block', margin: '0.5rem 0' }}>
                     Panel Admin
+                  </Link>
+                )}
+                {user?.rol === 'TURISTA' && (
+                  <Link to="/my-trips" className="navbar-link" style={{ display: 'block', margin: '0.5rem 0' }}>
+                    Mis Viajes
                   </Link>
                 )}
                 <button
@@ -123,6 +127,12 @@ export const PublicNavbar = () => {
                     <Link to="/admin" className="dropdown-item">
                       <User size={14} />
                       <span>Panel Admin</span>
+                    </Link>
+                  )}
+                  {user?.rol === 'TURISTA' && (
+                    <Link to="/my-trips" className="dropdown-item">
+                      <Briefcase size={14} />
+                      <span>Mis Viajes</span>
                     </Link>
                   )}
                   <button

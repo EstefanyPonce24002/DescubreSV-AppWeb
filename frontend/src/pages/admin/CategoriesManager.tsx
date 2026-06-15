@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import {
   Layers, Plus, Search, ChevronLeft, ChevronRight,
-  Pencil, Trash2, X, Activity, FolderOpen
+  Pencil, Trash2, X, FolderOpen
 } from 'lucide-react';
 import { categoriaService } from '../../services/categoriaService';
 import type { CategoriaResponse } from '../../services/categoriaService';
+import { useNotification } from '../../context/NotificationContext';
 
 export const CategoriesManager = () => {
+  const { showNotification } = useNotification();
   const [categories, setCategories] = useState<CategoriaResponse[]>([]);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -84,12 +86,14 @@ export const CategoriesManager = () => {
       if (modalMode === 'create') {
         const response = await categoriaService.crear(formData);
         if (response.success) {
+          showNotification('Categoría creada exitosamente.', 'success');
           setShowModal(false);
           fetchCategories();
         }
       } else if (modalMode === 'edit' && editingCategory) {
         const response = await categoriaService.actualizar(editingCategory.idCategoria, formData);
         if (response.success) {
+          showNotification('Categoría actualizada exitosamente.', 'success');
           setShowModal(false);
           fetchCategories();
         }
@@ -97,6 +101,7 @@ export const CategoriesManager = () => {
     } catch (err: any) {
       const errMsg = err.response?.data?.message || 'Error al guardar la categoría.';
       setError(errMsg);
+      showNotification(errMsg, 'error');
     }
   };
 
@@ -104,9 +109,10 @@ export const CategoriesManager = () => {
     if (confirm('¿Estás seguro de eliminar esta categoría? Esto podría afectar a los destinos asociados.')) {
       try {
         await categoriaService.eliminar(id);
+        showNotification('Categoría eliminada exitosamente.', 'success');
         fetchCategories();
       } catch (err: any) {
-        alert(err.response?.data?.message || 'No se puede eliminar la categoría.');
+        showNotification(err.response?.data?.message || 'No se puede eliminar la categoría.', 'error');
       }
     }
   };
@@ -118,9 +124,10 @@ export const CategoriesManager = () => {
         descripcion: category.descripcion,
         activo: !category.activo,
       });
+      showNotification('Estado de la categoría actualizado.', 'success');
       fetchCategories();
     } catch (err: any) {
-      alert('Error al cambiar el estado de la categoría.');
+      showNotification('Error al cambiar el estado de la categoría.', 'error');
     }
   };
 
@@ -156,17 +163,6 @@ export const CategoriesManager = () => {
           </div>
           <div className="stat-value">{totalCategoriasCount}</div>
           <div className="stat-subtitle">Registradas en el sistema</div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-card-header">
-            <span className="stat-title">Categorías Activas</span>
-            <div className="stat-icon stat-icon-success">
-              <Activity size={18} />
-            </div>
-          </div>
-          <div className="stat-value">{categories.filter(c => c.activo).length} (Pág.)</div>
-          <div className="stat-subtitle">Habilitadas para el público</div>
         </div>
       </div>
 

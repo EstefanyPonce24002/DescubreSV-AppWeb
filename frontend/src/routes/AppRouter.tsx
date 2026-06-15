@@ -5,11 +5,13 @@ import { UsersManager } from '../pages/admin/UsersManager';
 import { CategoriesManager } from '../pages/admin/CategoriesManager';
 import { DestinationsManager } from '../pages/admin/DestinationsManager';
 import { Login } from '../pages/auth/Login';
+import { Register } from '../pages/auth/Register';
 import { Home } from '../pages/public/Home';
 import { Explore } from '../pages/public/Explore';
 import { ProtectedRoute } from '../components/auth/ProtectedRoute';
 import { useAuth } from '../context/AuthContext';
 import { ItinerariosManager } from '../pages/admin/ItinerariosManager';
+import { MyTrips } from '../pages/tourist/MyTrips';
 
 const DefaultRedirect = () => {
   const { isAuthenticated, user } = useAuth();
@@ -18,7 +20,7 @@ const DefaultRedirect = () => {
   }
   return user.rol === 'ADMIN'
     ? <Navigate to="/admin/users" replace />
-    : <Navigate to="/" replace />;
+    : <Navigate to="/my-trips" replace />;
 };
 
 export const AppRouter = () => {
@@ -29,10 +31,16 @@ export const AppRouter = () => {
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<Home />} />
           <Route path="explore" element={<Explore />} />
+          <Route path="my-trips" element={
+            <ProtectedRoute allowedRoles={['TURISTA']}>
+              <MyTrips />
+            </ProtectedRoute>
+          } />
         </Route>
         
         {/*AUTENTICACIÓN */}
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         {/* 🛠️ PANEL DE ADMINISTRACIÓN */}
         <Route path="/admin" element={

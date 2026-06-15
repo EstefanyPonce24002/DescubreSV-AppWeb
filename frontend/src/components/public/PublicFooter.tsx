@@ -54,11 +54,6 @@ export const PublicFooter = () => {
 
         <div className="footer-bottom">
           <span>&copy; {new Date().getFullYear()} DescubreSV. Todos los derechos reservados.</span>
-          <div className="footer-bottom-links">
-            <span>Privacidad</span>
-            <span className="footer-dot" />
-            <span>Términos</span>
-          </div>
         </div>
       </div>
     </footer>
