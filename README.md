@@ -26,7 +26,11 @@ El Salvador carece de una plataforma centralizada que integre catálogo de desti
 
 ## 🗺️ Diagrama Entidad-Relación (DER)
 
-![Diagrama Entidad-Relación DESCUBRESV](database/DER.png)
+<img width="1085" height="794" alt="image" src="https://github.com/user-attachments/assets/e0f75537-5279-4286-a907-a3149fb879e2" />
+
+**Diagrama Entidad-Relación DESCUBRESV]**
+
+
 
 > 📁 El archivo SQL completo se encuentra en `/database/schema.sql`
 
