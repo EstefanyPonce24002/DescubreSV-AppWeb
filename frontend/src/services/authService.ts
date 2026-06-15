@@ -22,6 +22,9 @@ export interface AuthResponse {
   avatarUrl: string | null;
   rol: 'ADMIN' | 'TURISTA';
   token?: string;
+  nacionalidad?: string;
+  preferencias?: string;
+  presupuestoEstimado?: number;
 }
 
 export interface ApiResponse<T> {

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Trash2, MapPin } from 'lucide-react';
-import { itinerarioDestinoService, ItinerarioDestinoResponse, ItinerarioDestinoRequest } from '../../services/itinerarioDestinoService';
-import { destinoService, DestinoResponse } from '../../services/destinoService';
+import { itinerarioDestinoService, type ItinerarioDestinoResponse, type ItinerarioDestinoRequest } from '../../services/itinerarioDestinoService';
+import { destinoService, type DestinoResponse } from '../../services/destinoService';
+import { useNotification } from '../../context/NotificationContext';
 
 interface DestinosItinerarioModalProps {
   idItinerario: number;
@@ -10,6 +11,7 @@ interface DestinosItinerarioModalProps {
 }
 
 export function DestinosItinerarioModal({ idItinerario, nombreItinerario, onClose }: DestinosItinerarioModalProps) {
+  const { showNotification } = useNotification();
   const [destinosAsignados, setDestinosAsignados] = useState<ItinerarioDestinoResponse[]>([]);
   const [destinosDisponibles, setDestinosDisponibles] = useState<DestinoResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,11 +61,11 @@ export function DestinosItinerarioModal({ idItinerario, nombreItinerario, onClos
     setIsSubmitting(true);
     try {
       await itinerarioDestinoService.agregarDestino(formData);
+      showNotification('Destino agregado a la ruta con éxito.', 'success');
       await cargarDatos();
-      // Prepara el formulario para el siguiente destino (mismo día, siguiente orden)
       setFormData(prev => ({ ...prev, orden: prev.orden + 1, notas: '' }));
     } catch (error) {
-      alert('Error al vincular el destino. Recuerde que no puede agregar el mismo destino dos veces.');
+      showNotification('Error al vincular el destino. Recuerde que no puede agregar el mismo destino dos veces.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -73,9 +75,10 @@ export function DestinosItinerarioModal({ idItinerario, nombreItinerario, onClos
     if (confirm('¿Quitar este destino de la ruta?')) {
       try {
         await itinerarioDestinoService.eliminarDestino(idItinerario, idDestino);
+        showNotification('Destino quitado de la ruta.', 'info');
         cargarDatos();
       } catch (err) {
-        alert('Error al eliminar');
+        showNotification('Error al eliminar el destino de la ruta.', 'error');
       }
     }
   };

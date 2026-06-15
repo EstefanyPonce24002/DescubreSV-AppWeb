@@ -48,9 +48,13 @@ public class ItinerarioService {
                 .map(ItinerarioResponse::fromEntity);
     }
 
-    // Obtiene un itinerario con sus destinos, valida que sea del usuario
-    public ItinerarioResponse obtenerPorId(Long userId, Long idItinerario) {
-        Itinerario itinerario = buscarItinerarioDelUsuario(userId, idItinerario);
+    public Page<ItinerarioResponse> listarTodos(Pageable pageable) {
+        return itinerarioRepository.findAll(pageable)
+                .map(ItinerarioResponse::fromEntity);
+    }
+
+    public ItinerarioResponse obtenerPorId(Long userId, boolean esAdmin, Long idItinerario) {
+        Itinerario itinerario = buscarItinerario(userId, esAdmin, idItinerario);
 
         List<ItinerarioDestinoResponse> destinos = itinerarioDestinoRepository
                 .findByItinerarioIdItinerarioOrderByDiaNumeroAscOrdenAsc(idItinerario)
@@ -61,7 +65,6 @@ public class ItinerarioService {
         return ItinerarioResponse.fromEntityConDestinos(itinerario, destinos);
     }
 
-    // Crea un nuevo itinerario para el usuario autenticado
     public ItinerarioResponse crear(Long userId, ItinerarioRequest request) {
         Usuario usuario = usuarioRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
@@ -83,9 +86,8 @@ public class ItinerarioService {
         return ItinerarioResponse.fromEntity(itinerario);
     }
 
-    // Actualiza un itinerario existente del usuario
-    public ItinerarioResponse actualizar(Long userId, Long idItinerario, ItinerarioRequest request) {
-        Itinerario itinerario = buscarItinerarioDelUsuario(userId, idItinerario);
+    public ItinerarioResponse actualizar(Long userId, boolean esAdmin, Long idItinerario, ItinerarioRequest request) {
+        Itinerario itinerario = buscarItinerario(userId, esAdmin, idItinerario);
 
         itinerario.setNombre(request.getNombre());
         itinerario.setFechaInicio(request.getFechaInicio());
@@ -100,17 +102,15 @@ public class ItinerarioService {
         return ItinerarioResponse.fromEntity(itinerario);
     }
 
-    // Desactiva un itinerario del usuario
-    public void eliminar(Long userId, Long idItinerario) {
-        Itinerario itinerario = buscarItinerarioDelUsuario(userId, idItinerario);
+    public void eliminar(Long userId, boolean esAdmin, Long idItinerario) {
+        Itinerario itinerario = buscarItinerario(userId, esAdmin, idItinerario);
         itinerario.setActivo(false);
         itinerarioRepository.save(itinerario);
     }
 
-    // Agrega un destino al itinerario del usuario
-    public ItinerarioDestinoResponse agregarDestino(Long userId, Long idItinerario,
+    public ItinerarioDestinoResponse agregarDestino(Long userId, boolean esAdmin, Long idItinerario,
             ItinerarioDestinoRequest request) {
-        Itinerario itinerario = buscarItinerarioDelUsuario(userId, idItinerario);
+        Itinerario itinerario = buscarItinerario(userId, esAdmin, idItinerario);
 
         Destino destino = destinoRepository.findById(request.getIdDestino())
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -128,9 +128,8 @@ public class ItinerarioService {
         return ItinerarioDestinoResponse.fromEntity(itinerarioDestino);
     }
 
-    // Quita un destino del itinerario del usuario
-    public void quitarDestino(Long userId, Long idItinerario, Long idDestino) {
-        buscarItinerarioDelUsuario(userId, idItinerario);
+    public void quitarDestino(Long userId, boolean esAdmin, Long idItinerario, Long idDestino) {
+        buscarItinerario(userId, esAdmin, idItinerario);
 
         ItinerarioDestinoId id = new ItinerarioDestinoId(idItinerario, idDestino);
         if (!itinerarioDestinoRepository.existsById(id)) {
@@ -140,13 +139,12 @@ public class ItinerarioService {
         itinerarioDestinoRepository.deleteById(id);
     }
 
-    // Busca un itinerario y valida que pertenezca al usuario
-    private Itinerario buscarItinerarioDelUsuario(Long userId, Long idItinerario) {
+    private Itinerario buscarItinerario(Long userId, boolean esAdmin, Long idItinerario) {
         Itinerario itinerario = itinerarioRepository.findById(idItinerario)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Itinerario no encontrado con id: " + idItinerario));
 
-        if (!itinerario.getUsuario().getIdUsuario().equals(userId)) {
+        if (!esAdmin && !itinerario.getUsuario().getIdUsuario().equals(userId)) {
             throw new BadRequestException("Este itinerario no te pertenece");
         }
 

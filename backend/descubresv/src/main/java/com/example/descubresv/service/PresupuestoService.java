@@ -26,9 +26,8 @@ public class PresupuestoService {
         this.itinerarioRepository = itinerarioRepository;
     }
 
-    // Obtiene el presupuesto de un itinerario
-    public PresupuestoResponse obtenerPorItinerario(Long userId, Long idItinerario) {
-        validarItinerarioDelUsuario(userId, idItinerario);
+    public PresupuestoResponse obtenerPorItinerario(Long userId, boolean esAdmin, Long idItinerario) {
+        validarItinerario(userId, esAdmin, idItinerario);
 
         Presupuesto presupuesto = presupuestoRepository.findByItinerarioIdItinerario(idItinerario)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -37,9 +36,8 @@ public class PresupuestoService {
         return PresupuestoResponse.fromEntity(presupuesto);
     }
 
-    // Crea o actualiza el presupuesto de un itinerario, calcula el total
-    public PresupuestoResponse guardar(Long userId, Long idItinerario, PresupuestoRequest request) {
-        Itinerario itinerario = validarItinerarioDelUsuario(userId, idItinerario);
+    public PresupuestoResponse guardar(Long userId, boolean esAdmin, Long idItinerario, PresupuestoRequest request) {
+        Itinerario itinerario = validarItinerario(userId, esAdmin, idItinerario);
 
         Presupuesto presupuesto = presupuestoRepository.findByItinerarioIdItinerario(idItinerario)
                 .orElse(Presupuesto.builder().itinerario(itinerario).build());
@@ -59,18 +57,16 @@ public class PresupuestoService {
         return PresupuestoResponse.fromEntity(presupuesto);
     }
 
-    // Retorna el valor o cero si es null
     private BigDecimal valorOCero(BigDecimal valor) {
         return valor != null ? valor : BigDecimal.ZERO;
     }
 
-    // Valida que el itinerario exista y sea del usuario autenticado
-    private Itinerario validarItinerarioDelUsuario(Long userId, Long idItinerario) {
+    private Itinerario validarItinerario(Long userId, boolean esAdmin, Long idItinerario) {
         Itinerario itinerario = itinerarioRepository.findById(idItinerario)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Itinerario no encontrado con id: " + idItinerario));
 
-        if (!itinerario.getUsuario().getIdUsuario().equals(userId)) {
+        if (!esAdmin && !itinerario.getUsuario().getIdUsuario().equals(userId)) {
             throw new BadRequestException("Este itinerario no te pertenece");
         }
 

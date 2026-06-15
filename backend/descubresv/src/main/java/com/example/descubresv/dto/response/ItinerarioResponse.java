@@ -18,6 +18,8 @@ import java.util.List;
 public class ItinerarioResponse {
 
     private Long idItinerario;
+    private Long usuarioId;
+    private String nombreUsuario;
     private String nombre;
     private LocalDate fechaInicio;
     private LocalDate fechaFin;
@@ -35,6 +37,8 @@ public class ItinerarioResponse {
     public static ItinerarioResponse fromEntity(Itinerario itinerario) {
         return ItinerarioResponse.builder()
                 .idItinerario(itinerario.getIdItinerario())
+                .usuarioId(itinerario.getUsuario() != null ? itinerario.getUsuario().getIdUsuario() : null)
+                .nombreUsuario(itinerario.getUsuario() != null ? itinerario.getUsuario().getNombre() : null)
                 .nombre(itinerario.getNombre())
                 .fechaInicio(itinerario.getFechaInicio())
                 .fechaFin(itinerario.getFechaFin())

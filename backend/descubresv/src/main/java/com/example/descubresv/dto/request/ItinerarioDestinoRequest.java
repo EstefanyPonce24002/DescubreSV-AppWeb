@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ItinerarioDestinoRequest {
 
+    private Long idItinerario;
+
     @NotNull(message = "El id del destino es obligatorio")
     private Long idDestino;
 

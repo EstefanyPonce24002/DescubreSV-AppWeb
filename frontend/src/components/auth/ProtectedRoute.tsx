@@ -11,11 +11,18 @@ export const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'var(--app-bg)'
+      }}>
+        <div className="login-spinner" style={{ borderColor: 'var(--primary-color) transparent transparent transparent' }} />
       </div>
     );
   }
+
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;

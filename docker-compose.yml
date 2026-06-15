@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: descubresv-db
+    environment:
+      POSTGRES_DB: descubresv_db
+      POSTGRES_USER: descubresv_user
+      POSTGRES_PASSWORD: descubresv_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U descubresv_user -d descubresv_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend/descubresv
+      dockerfile: Dockerfile
+    container_name: descubresv-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/descubresv_db
+      - DB_USERNAME=descubresv_user
+      - DB_PASSWORD=descubresv_pass
+      - CORS_ORIGINS=http://localhost:5173,http://localhost
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: descubresv-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

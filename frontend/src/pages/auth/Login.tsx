@@ -55,7 +55,7 @@ export const Login = () => {
               <Shield size={22} />
             </div>
             <h1 className="login-title">DescubreSV</h1>
-            <p className="login-subtitle">Ingresa a tu cuenta de administrador</p>
+            <p className="login-subtitle">Ingresa a tu cuenta de DescubreSV</p>
           </div>
 
           {localError && (
@@ -122,6 +122,23 @@ export const Login = () => {
               )}
             </button>
           </form>
+
+          <div style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.875rem' }}>
+            <span style={{ color: 'var(--color-muted)' }}>¿No tienes cuenta? </span>
+            <button
+              onClick={() => navigate('/register')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--color-primary)',
+                fontWeight: 600,
+                cursor: 'pointer',
+                padding: 0
+              }}
+            >
+              Regístrate aquí
+            </button>
+          </div>
 
           <div className="login-footer">
             <span>Sistema de gestión</span>

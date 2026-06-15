@@ -7,6 +7,7 @@ import {
 import { CreateUser } from './CreateUser';
 import { usuarioService } from '../../services/usuarioService';
 import type { Usuario } from '../../services/usuarioService';
+import { useNotification } from '../../context/NotificationContext';
 
 const formatDate = (dateStr: string) => {
   if (!dateStr) return '';
@@ -19,6 +20,7 @@ const formatCurrency = (amount?: number) => {
 };
 
 export const UsersManager = () => {
+  const { showNotification } = useNotification();
   const [users, setUsers] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
@@ -113,14 +115,15 @@ export const UsersManager = () => {
     if (window.confirm('¿Estás seguro de eliminar este usuario?')) {
       try {
         await usuarioService.eliminar(id);
+        showNotification('Usuario eliminado correctamente.', 'success');
         await loadUsers();
         setSelectedUsers(prev => prev.filter(selectedId => selectedId !== id));
         setOpenMenuId(null);
       } catch (err: any) {
-        alert(err.response?.data?.message || err.message || 'Error al eliminar el usuario');
+        showNotification(err.response?.data?.message || err.message || 'Error al eliminar el usuario', 'error');
       }
     }
-  }, [loadUsers]);
+  }, [loadUsers, showNotification]);
 
   const handleToggleActive = useCallback(async (id: number) => {
     const userToToggle = users.find(u => u.idUsuario === id);
@@ -134,12 +137,13 @@ export const UsersManager = () => {
         nacionalidad: userToToggle.nacionalidad,
         presupuestoEstimado: userToToggle.presupuestoEstimado
       });
+      showNotification('Estado del usuario actualizado.', 'success');
       await loadUsers();
       setOpenMenuId(null);
     } catch (err: any) {
-      alert(err.response?.data?.message || err.message || 'Error al actualizar estado del usuario');
+      showNotification(err.response?.data?.message || err.message || 'Error al actualizar estado del usuario', 'error');
     }
-  }, [users, loadUsers]);
+  }, [users, loadUsers, showNotification]);
 
   const toggleSelectAll = useCallback(() => {
     if (selectedUsers.length === filteredUsers.length) {

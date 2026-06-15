@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import {
   MapPin, Plus, Search, ChevronLeft, ChevronRight, Filter,
-  Pencil, Trash2, X, Activity, Compass
+  Pencil, Trash2, X, Compass
 } from 'lucide-react';
-import { destinoService } from '../../services/destinoService';
-import type { DestinoResponse } from '../../services/destinoService';
-import { categoriaService } from '../../services/categoriaService';
-import type { CategoriaResponse } from '../../services/categoriaService';
+import { destinoService, type DestinoResponse } from '../../services/destinoService';
+import { categoriaService, type CategoriaResponse } from '../../services/categoriaService';
 import { CreateDestination } from './CreateDestination';
+import { useNotification } from '../../context/NotificationContext';
 
 const DEPARTAMENTOS = [
   'Ahuachapán', 'Cabañas', 'Chalatenango', 'Cuscatlán', 'La Libertad',
@@ -16,6 +15,7 @@ const DEPARTAMENTOS = [
 ];
 
 export const DestinationsManager = () => {
+  const { showNotification } = useNotification();
   const [destinations, setDestinations] = useState<DestinoResponse[]>([]);
   const [categories, setCategories] = useState<CategoriaResponse[]>([]);
   const [totalElements, setTotalElements] = useState(0);
@@ -94,9 +94,10 @@ export const DestinationsManager = () => {
     if (confirm('¿Estás seguro de eliminar este destino turístico?')) {
       try {
         await destinoService.eliminar(id);
+        showNotification('Destino turístico eliminado correctamente.', 'success');
         fetchDestinations();
       } catch (err: any) {
-        alert(err.response?.data?.message || 'Error al eliminar el destino.');
+        showNotification(err.response?.data?.message || 'Error al eliminar el destino.', 'error');
       }
     }
   };
@@ -119,9 +120,10 @@ export const DestinationsManager = () => {
         idCategoria: destino.idCategoria,
         activo: !destino.activo,
       });
+      showNotification('Estado del destino turístico actualizado.', 'success');
       fetchDestinations();
     } catch (err) {
-      alert('Error al actualizar el estado del destino.');
+      showNotification('Error al actualizar el estado del destino.', 'error');
     }
   };
 
